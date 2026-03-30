@@ -121,32 +121,11 @@ Here’s a **simple diagram you can paste into README**:
 
 ## 🧭 System Diagram
 ```mermaid
-[ React Frontend ]
-        │
-        │ (image upload)
-        ▼
-[ FastAPI Backend ]
-        │
-        ▼
-[ ML Pipeline ]
-   ├── Car Detection
-   ├── Front/Rear Classifier
-   ├── License Plate Detection
-   └── OCR
-        │
-        ▼
-[ JSON Response ]
-        │
-        ▼
-[ UI Displays Result ]
-```
-
-```mermaid
 flowchart TD
     A[React Frontend] -->|Upload Image| B[FastAPI Backend]
     B --> C[Car Detection]
     C --> D[Front/Rear Classification]
-    D -->|If Rear| E[Plate Detection]
+    D -->|If Rear| E[License Plate Detection]
     E --> F[OCR]
     D --> G[Return JSON]
     F --> G
