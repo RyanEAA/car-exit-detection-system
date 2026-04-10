@@ -1,4 +1,4 @@
-# 🚗 Car Exit Detection System
+# Car Exit Detection System
 
 A full-stack computer vision web application that:
 - Detects cars in images
@@ -7,7 +7,7 @@ A full-stack computer vision web application that:
 
 ---
 
-## 🧠 System Overview
+## System Overview
 
 This project uses:
 - **FastAPI** for backend ML inference
@@ -16,7 +16,7 @@ This project uses:
 
 ---
 
-## ⚙️ Architecture
+## Architecture
 
 Frontend (React)
 → Upload Image  
@@ -29,7 +29,7 @@ Frontend (React)
 
 ---
 
-## 📦 Tech Stack
+## Tech Stack
 
 ### Backend
 - FastAPI
@@ -42,7 +42,7 @@ Frontend (React)
 
 ---
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### 1. Clone repo
 
@@ -51,25 +51,25 @@ git clone https://github.com/YOUR_USERNAME/car-exit-detection-system.git
 cd car-exit-detection-system
 ```
 
-🐍 Backend Setup
+#### Backend Setup
 ```bash
 pip install -r requirements.txt
 python run.py
 ```
 
 Backend runs at:
-
 http://127.0.0.1:8000
-🌐 Frontend Setup
+
+####Frontend Setup
 ```bash
 cd car-ui
 npm install
 npm run dev
 ```
 Frontend runs at:
-
 http://localhost:5173
-🔌 Environment Variables
+
+#### Environment Variables
 
 Create a .env file inside car-ui/:
 
@@ -77,7 +77,7 @@ VITE_API_URL=http://127.0.0.1:8000
 
 ---
 
-## 🧪 Usage
+## Usage
 
 Open frontend
 
@@ -90,36 +90,27 @@ View results
 
 ---
 
-## 📌 Current Status
-
+## Current Status
+✅ Integrate YOLOv8 for car detection
+✅ Add front/rear classifier model
+✅ License plate detection + OCR
 ✅ Image upload working
-
 ✅ API pipeline working
 
-🚧 ML models currently stubbed (placeholder outputs)
+---
+
+## Future Improvements
+🚧 Real-time camera support
+🚧 Deploy to cloud
 
 ---
 
-## 🔮 Future Improvements
-
-Integrate YOLOv8 for car detection
-
-Add front/rear classifier model
-
-License plate detection + OCR
-
-Real-time camera support
-
-Deploy to cloud
-
----
-
-# 🧭 4. System Diagram
+# 4. System Diagram
 
 Here’s a **simple diagram you can paste into README**:
 
 
-## 🧭 System Diagram
+## System Diagram
 ```mermaid
 flowchart TD
     A[React Frontend] -->|Upload Image| B[FastAPI Backend]
@@ -131,10 +122,4 @@ flowchart TD
     F --> G
     G --> H[Display Results in UI]
 ```
-
-👤 Author
-
-Ryan Aparicio
-Computer Science @ St. Edward’s University
-AI / ML Researcher
 
