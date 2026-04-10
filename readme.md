@@ -92,15 +92,20 @@ View results
 
 ## Current Status
 ✅ Integrate YOLOv8 for car detection
+
 ✅ Add front/rear classifier model
+
 ✅ License plate detection + OCR
+
 ✅ Image upload working
+
 ✅ API pipeline working
 
 ---
 
 ## Future Improvements
 🚧 Real-time camera support
+
 🚧 Deploy to cloud
 
 ---
