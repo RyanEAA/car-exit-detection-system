@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -40,13 +41,22 @@ def save_upload(contents: bytes, filename: str | None, user_id: int, content_typ
     return os.path.relpath(absolute_path, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
-def process_video(video_path: str, frame_stride: int = 10, max_frames: int = 180) -> dict:
+def save_frame_image(frame: np.ndarray, user_id: int) -> str:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    user_folder = os.path.join(UPLOAD_DIR, f"user_{user_id}")
+    os.makedirs(user_folder, exist_ok=True)
+    stored_name = f"{uuid4().hex}.jpg"
+    absolute_path = os.path.join(user_folder, stored_name)
+    cv2.imwrite(absolute_path, frame)
+    return os.path.relpath(absolute_path, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+
+def process_video(video_path: str, frame_stride: int = 10, max_frames: int = 180) -> tuple[dict, np.ndarray | None]:
     capture = cv2.VideoCapture(video_path)
     if not capture.isOpened():
-        return {"is_car": False}
+        return {"is_car": False}, None
 
     frame_index = 0
-    last_result: dict = {"is_car": False}
 
     try:
         while frame_index < max_frames:
@@ -56,18 +66,20 @@ def process_video(video_path: str, frame_stride: int = 10, max_frames: int = 180
 
             if frame_index % frame_stride == 0:
                 frame_result = process_image(frame)
-                last_result = frame_result
-                if frame_result.get("is_car"):
+                if frame_result.get("is_car") and frame_result.get("view") == "rear":
                     frame_result["frame_index"] = frame_index
-                    return frame_result
+                    return frame_result, frame
 
             frame_index += 1
     finally:
         capture.release()
 
-    if last_result.get("is_car"):
-        last_result["frame_index"] = frame_index
-    return last_result
+    return {
+        "is_car": False,
+        "view": None,
+        "license_plate": None,
+        "message": "No rear car detection found in video",
+    }, None
 
 
 def build_detection_response(detection: Detection) -> dict:
@@ -94,14 +106,31 @@ async def detect(
 
     contents = await file.read()
     media_type = "video" if file.content_type in SUPPORTED_VIDEO_TYPES else "image"
-    saved_path = save_upload(contents, file.filename, current_user.id, file.content_type)
-    absolute_saved_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-        saved_path,
-    )
+
+    result: dict
+    saved_path: str | None = None
 
     if media_type == "video":
-        result = process_video(absolute_saved_path)
+        extension = os.path.splitext(file.filename or "")[1] or ".mp4"
+        with tempfile.NamedTemporaryFile(suffix=extension, delete=False) as temp_video:
+            temp_video.write(contents)
+            temp_video_path = temp_video.name
+
+        try:
+            result, rear_frame = process_video(temp_video_path)
+        finally:
+            if os.path.exists(temp_video_path):
+                os.remove(temp_video_path)
+
+        if rear_frame is None:
+            return {
+                **result,
+                "record": None,
+                "media_type": "video",
+            }
+
+        saved_path = save_frame_image(rear_frame, current_user.id)
+        media_type = "image"
     else:
         nparr = np.frombuffer(contents, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -113,6 +142,7 @@ async def detect(
             )
 
         result = process_image(image)
+        saved_path = save_upload(contents, file.filename, current_user.id, file.content_type)
 
     now = datetime.now(timezone.utc)
 

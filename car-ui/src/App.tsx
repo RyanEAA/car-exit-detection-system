@@ -82,6 +82,9 @@ function App() {
   const [history, setHistory] = useState<HistoryItem[]>([])
   const [historyBusy, setHistoryBusy] = useState(false)
   const [historyMessage, setHistoryMessage] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editingPlate, setEditingPlate] = useState('')
+  const [historyActionBusy, setHistoryActionBusy] = useState(false)
 
   useEffect(() => {
     if (!preview) {
@@ -238,6 +241,71 @@ function App() {
     }
   }
 
+  const startEditPlate = (entry: HistoryItem) => {
+    setEditingId(entry.detection.id)
+    setEditingPlate(entry.detection.license_plate ?? '')
+  }
+
+  const cancelEditPlate = () => {
+    setEditingId(null)
+    setEditingPlate('')
+  }
+
+  const savePlate = async (detectionId: number) => {
+    setHistoryActionBusy(true)
+    setHistoryMessage(null)
+
+    try {
+      const response = await apiFetch(`/history/${detectionId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ license_plate: editingPlate }),
+      })
+
+      if (!response.ok) {
+        const errorBody = (await response.json().catch(() => null)) as { detail?: string } | null
+        throw new Error(errorBody?.detail ?? 'Unable to update plate')
+      }
+
+      const updated: HistoryItem = await response.json()
+      setHistory((previous) =>
+        previous.map((entry) => (entry.detection.id === detectionId ? updated : entry)),
+      )
+      cancelEditPlate()
+    } catch (error) {
+      setHistoryMessage(error instanceof Error ? error.message : 'Unable to update plate')
+    } finally {
+      setHistoryActionBusy(false)
+    }
+  }
+
+  const deleteRecord = async (detectionId: number) => {
+    const shouldDelete = window.confirm('Delete this detection record?')
+    if (!shouldDelete) return
+
+    setHistoryActionBusy(true)
+    setHistoryMessage(null)
+
+    try {
+      const response = await apiFetch(`/history/${detectionId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorBody = (await response.json().catch(() => null)) as { detail?: string } | null
+        throw new Error(errorBody?.detail ?? 'Unable to delete record')
+      }
+
+      setHistory((previous) => previous.filter((entry) => entry.detection.id !== detectionId))
+      if (editingId === detectionId) {
+        cancelEditPlate()
+      }
+    } catch (error) {
+      setHistoryMessage(error instanceof Error ? error.message : 'Unable to delete record')
+    } finally {
+      setHistoryActionBusy(false)
+    }
+  }
+
   const historyCards = history.map((entry) => (
     <article key={entry.detection.id} className="history-card">
       {entry.media_type === 'video' ? (
@@ -249,9 +317,58 @@ function App() {
         <p className="eyebrow">
           {entry.detection.exit_date} · {entry.detection.exit_time}
         </p>
-        <h3>{entry.detection.license_plate ?? 'No plate detected'}</h3>
+        {editingId === entry.detection.id ? (
+          <div className="plate-editor">
+            <input
+              value={editingPlate}
+              onChange={(event) => setEditingPlate(event.target.value)}
+              placeholder="Enter license plate"
+              maxLength={64}
+            />
+            <div className="card-actions">
+              <button
+                className="ghost-button"
+                type="button"
+                onClick={() => void savePlate(entry.detection.id)}
+                disabled={historyActionBusy}
+              >
+                Save
+              </button>
+              <button
+                className="ghost-button"
+                type="button"
+                onClick={cancelEditPlate}
+                disabled={historyActionBusy}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <h3>{entry.detection.license_plate ?? 'No plate detected'}</h3>
+        )}
         <p>{entry.detection.is_car ? 'Car detected' : 'No car detected'}</p>
         <p>{entry.detection.view ?? 'View unavailable'}</p>
+        {editingId !== entry.detection.id && (
+          <div className="card-actions">
+            <button
+              className="ghost-button"
+              type="button"
+              onClick={() => startEditPlate(entry)}
+              disabled={historyActionBusy}
+            >
+              Edit plate
+            </button>
+            <button
+              className="ghost-button danger"
+              type="button"
+              onClick={() => void deleteRecord(entry.detection.id)}
+              disabled={historyActionBusy}
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
     </article>
   ))

@@ -53,6 +53,10 @@ class DetectionRecordResponse(BaseModel):
     media_type: str
 
 
+class DetectionUpdateRequest(BaseModel):
+    license_plate: str | None = Field(default=None, max_length=64)
+
+
 class AuthResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
