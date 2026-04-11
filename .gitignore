@@ -12,3 +12,5 @@ dist/
 
 # Models (optional if large)
 models/
+
+/__pycache__

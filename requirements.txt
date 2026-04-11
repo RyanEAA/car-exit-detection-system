@@ -1,6 +1,7 @@
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
+bcrypt==4.3.0
 certifi==2026.2.25
 charset-normalizer==3.4.6
 click==8.3.1
@@ -31,11 +32,13 @@ polars==1.39.3
 polars-runtime-32==1.39.3
 psutil==7.2.2
 pyclipper==1.4.0
+passlib[bcrypt]==1.7.4
 pydantic==2.12.5
 pydantic_core==2.41.5
 pyparsing==3.3.2
 python-bidi==0.6.7
 python-dateutil==2.9.0.post0
+python-jose[cryptography]==3.5.0
 python-multipart==0.0.22
 PyYAML==6.0.3
 requests==2.33.0
@@ -44,6 +47,7 @@ scipy==1.17.1
 setuptools==81.0.0
 shapely==2.1.2
 six==1.17.0
+SQLAlchemy==2.0.43
 starlette==1.0.0
 sympy==1.14.0
 tifffile==2026.3.3
