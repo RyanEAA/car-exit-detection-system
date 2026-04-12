@@ -127,11 +127,13 @@ input[type='file']::file-selector-button {
 }
 
 .segmented-control {
-  display: inline-flex;
-  padding: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  padding: 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  gap: 4px;
+  gap: 6px;
 }
 
 .segmented-control button,
@@ -142,10 +144,12 @@ input[type='file']::file-selector-button {
 }
 
 .segmented-control button {
+  width: 100%;
   padding: 10px 16px;
   border-radius: 999px;
   background: transparent;
   color: rgba(255, 255, 255, 0.74);
+  text-align: center;
 }
 
 .segmented-control button.active {

@@ -410,6 +410,7 @@ function App() {
             <label>
               Username
               <input
+                type="text"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
                 autoComplete="username"
